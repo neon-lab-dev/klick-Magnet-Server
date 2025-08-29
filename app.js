@@ -20,7 +20,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 app.use(cors({
-    origin: ["https://blogdesigngobinath.netlify.app","https://lets-blog-client.netlify.app","http://localhost:3000", "http://localhost:5173", "https://blogdesign-gilt.vercel.app","https://blogadmin-sage.vercel.app"],
+    origin: ["http://localhost:5173", "https://klick-magnet-dashboard.vercel.app"],
     credentials: true,
     methods: ["GET", "POST", "DELETE", "PUT"],
 }));
