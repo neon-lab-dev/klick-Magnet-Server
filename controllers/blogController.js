@@ -5,7 +5,6 @@ import getDataUri from "../utils/dataUri.js";
 import ErrorHandler from "../utils/errorhandler.js";
 import { processTags } from "../utils/tags.js";
 import { deleteImage, uploadImage } from "../utils/uploadImage.js";
-import categoryModel from "../models/category.model.js";
 
 export const createBlog = catchAsyncErrors(async (req, res, next) => {
   const { title, metaDescription, content, tags } = req.body;
@@ -21,14 +20,11 @@ export const createBlog = catchAsyncErrors(async (req, res, next) => {
     getDataUri(req.file).fileName,
     "blog-thumbnails"
   );
-
-  console.log(thumbnail, "thumbnail");
-  const modifiedTags = processTags(tags);
   const blog = new blogModel({
     title,
     metaDescription,
     content,
-    tags: modifiedTags,
+    tags,
     thumbnail,
     author: res.locals.admin.id,
   });
@@ -110,28 +106,43 @@ export const deleteBlog = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
+
 export const updateBlog = catchAsyncErrors(async (req, res, next) => {
   const { id } = req.params;
-  const { title, metaDescription, content, tags } = req.body;
+  const { title, metaDescription, content } = req.body;
+  let { tags } = req.body; // tags may come as JSON string from FormData
   const authorId = res.locals.admin.id;
+  console.log(tags);
 
   const blog = await blogModel.findById(id);
   if (!blog) {
     return next(new ErrorHandler("Blog not found", 404));
   }
 
+  // Ensure only author can update
   if (blog.author.toString() !== authorId) {
     return next(
       new ErrorHandler("You are not authorized to update this blog", 403)
     );
   }
 
+  // Parse tags if it's a string (from FormData)
+  if (tags) {
+    try {
+      tags = typeof tags === "string" ? JSON.parse(tags) : tags;
+      if (!Array.isArray(tags)) throw new Error();
+    } catch (error) {
+      return next(new ErrorHandler("Invalid tags format", 400));
+    }
+  }
+
   const updateFields = {};
   if (title) updateFields.title = title;
   if (metaDescription) updateFields.metaDescription = metaDescription;
   if (content) updateFields.content = content;
-  if (tags) updateFields.tags = processTags(tags);
+  if (tags) updateFields.tags = tags;
 
+  // Handle thumbnail upload
   if (req.file) {
     if (blog.thumbnail) {
       await deleteImage(blog.thumbnail.fileId);
