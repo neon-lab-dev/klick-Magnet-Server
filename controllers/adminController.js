@@ -69,9 +69,9 @@ export const logoutAdmin = catchAsyncErrors(async (req, res, next) => {
 // Change password for logged-in admin
 export const changeAdminPassword = catchAsyncErrors(async (req, res, next) => {
   const adminId = res.locals.admin.id;
-  const { oldPassword, newPassword } = req.body;
+  const { currentPassword, newPassword } = req.body;
 
-  if (!oldPassword || !newPassword) {
+  if (!currentPassword || !newPassword) {
     return next(new ErrorHandler("Please provide old and new password", 400));
   }
 
@@ -81,7 +81,7 @@ export const changeAdminPassword = catchAsyncErrors(async (req, res, next) => {
   }
 
   // Verify old password
-  const isMatch = await admin.comparePassword(oldPassword);
+  const isMatch = await admin.comparePassword(currentPassword);
   if (!isMatch) {
     return next(new ErrorHandler("Old password is incorrect", 401));
   }
