@@ -17,16 +17,16 @@ const BlogSchema = new Schema(
             type: String,
             required: [true, "Please enter the blog content"],
         },
-        category: {
-            type: Schema.Types.ObjectId,
-            ref: "Category",
-            required: [true, "Please select a blog category"],
-        },
-        subCategory: {
-            type: Schema.Types.ObjectId,
-            ref: "Category.subCategory",
-            required: [true, "Please select a blog subcategory"],
-        },
+        // category: {
+        //     type: Schema.Types.ObjectId,
+        //     ref: "Category",
+        //     required: [true, "Please select a blog category"],
+        // },
+        // subCategory: {
+        //     type: Schema.Types.ObjectId,
+        //     ref: "Category.subCategory",
+        //     required: [true, "Please select a blog subcategory"],
+        // },
         tags: {
             type: [String],
             required: [true, "Please provide tags for the blog"],
@@ -38,7 +38,7 @@ const BlogSchema = new Schema(
         author: {
             type: Schema.Types.ObjectId,
             ref: "Admin",
-            required: true,
+            required: false,
         },
     },
     {

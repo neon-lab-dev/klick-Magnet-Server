@@ -8,7 +8,7 @@ import {  deleteCategory, deleteSubCategory, fetchBlogsBySubCategory, getAllCate
 const router = express.Router();
 
 // Blog routes
-router.route("/blog/create").post(isAuthenticatedAdmin, singleUpload, createBlog);
+router.route("/blog/add").post(isAuthenticatedAdmin, singleUpload, createBlog);
 router.route("/blog/:id").put(isAuthenticatedAdmin, singleUpload, updateBlog);
 router.route("/blog/:id").delete(isAuthenticatedAdmin, deleteBlog);
 router.route("/blog").get(getAllBlogs);

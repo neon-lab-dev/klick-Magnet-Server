@@ -8,27 +8,14 @@ import { deleteImage, uploadImage } from "../utils/uploadImage.js";
 import categoryModel from "../models/category.model.js";
 import { processBlogsWithSubCategory } from "./category.controller.js";
 
-
 export const createBlog = catchAsyncErrors(async (req, res, next) => {
-  const { title, metaDescription, content, category, subCategory, tags } = req.body;
+  const { title, metaDescription, content, tags } = req.body;
 
-
-  if (!title || !metaDescription || !content || !category || !subCategory || !tags) {
+  if (!title || !content || !tags) {
     return next(new ErrorHandler("All required fields must be filled", 400));
   }
   if (!req.file) {
     return next(new ErrorHandler("Please upload a thumbnail", 400));
-  }
-  const categoryData = await categoryModel.findById(category);
-  if (!categoryData) {
-    return next(new ErrorHandler("Category not found", 404));
-  }
-
-
-
-  const subCategoryData = categoryData.subCategory.id(subCategory); // Check embedded subcategory
-  if (!subCategoryData) {
-    return next(new ErrorHandler("Subcategory not found in the selected category", 404));
   }
   const thumbnail = await uploadImage(
     getDataUri(req.file).content,
@@ -42,8 +29,6 @@ export const createBlog = catchAsyncErrors(async (req, res, next) => {
     title,
     metaDescription,
     content,
-    category,
-    subCategory,
     tags: modifiedTags,
     thumbnail,
     author: res.locals.admin.id,
@@ -131,7 +116,8 @@ export const deleteBlog = catchAsyncErrors(async (req, res, next) => {
 });
 export const updateBlog = catchAsyncErrors(async (req, res, next) => {
   const { id } = req.params;
-  const { title, metaDescription, content, category, subCategory, tags } = req.body;
+  const { title, metaDescription, content, category, subCategory, tags } =
+    req.body;
   const authorId = res.locals.admin.id;
   console.log(subCategory, "subCategory");
 
@@ -140,17 +126,16 @@ export const updateBlog = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Blog not found", 404));
   }
 
-
   if (blog.author.toString() !== authorId) {
-    return next(new ErrorHandler("You are not authorized to update this blog", 403));
+    return next(
+      new ErrorHandler("You are not authorized to update this blog", 403)
+    );
   }
-
 
   const updateFields = {};
   if (title) updateFields.title = title;
   if (metaDescription) updateFields.metaDescription = metaDescription;
   if (content) updateFields.content = content;
-
 
   if (category || subCategory) {
     let categoryData;
@@ -164,7 +149,12 @@ export const updateBlog = catchAsyncErrors(async (req, res, next) => {
 
     if (subCategory) {
       if (!category) {
-        return next(new ErrorHandler("Please provide category while updating subcategory", 400));
+        return next(
+          new ErrorHandler(
+            "Please provide category while updating subcategory",
+            400
+          )
+        );
       }
 
       // Ensure the category data is available and subCategory exists in the category
@@ -173,7 +163,12 @@ export const updateBlog = catchAsyncErrors(async (req, res, next) => {
       );
 
       if (!subCategoryData) {
-        return next(new ErrorHandler("Subcategory not found in the selected category", 404));
+        return next(
+          new ErrorHandler(
+            "Subcategory not found in the selected category",
+            404
+          )
+        );
       }
 
       updateFields.subCategory = subCategory; // Add subcategory to updateFields
@@ -199,7 +194,6 @@ export const updateBlog = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("No fields provided for update", 400));
   }
 
-
   const updatedBlog = await blogModel.findByIdAndUpdate(id, updateFields, {
     new: true,
     runValidators: true,
@@ -212,18 +206,15 @@ export const updateBlog = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-
 // export const updateBlog = catchAsyncErrors(async (req, res, next) => {
 //   const { id } = req.params;
 //   const { title, metaDescription, content, category, tags } = req.body;
 //   const authorId = res.locals.admin.id;
 
-
 //   const blog = await blogModel.findById(id);
 //   if (!blog) {
 //     return next(new ErrorHandler("Blog not found", 404));
 //   }
-
 
 //   if (blog.author.toString() !== authorId) {
 //     return next(
@@ -231,14 +222,11 @@ export const updateBlog = catchAsyncErrors(async (req, res, next) => {
 //     );
 //   }
 
-
 //   const updateFields = {};
-
 
 //   if (title) updateFields.title = title;
 //   if (metaDescription) updateFields.metaDescription = metaDescription;
 //   if (content) updateFields.content = content;
-
 
 //   if (category) {
 //     let categoryObj;
@@ -259,16 +247,12 @@ export const updateBlog = catchAsyncErrors(async (req, res, next) => {
 //     }
 //   }
 
-
-
-
 //   if (tags) {
 //     const modifiedTags = tags[0]
 //       .split(",")
 //       .map((str) => str.trim().replace(/(^"|"$)/g, ""));
 //     updateFields.tags = modifiedTags;
 //   }
-
 
 //   if (req.file) {
 //     const file = req.file;
@@ -283,11 +267,9 @@ export const updateBlog = catchAsyncErrors(async (req, res, next) => {
 //     updateFields.thumbnail = thumbnail;
 //   }
 
-
 //   if (Object.keys(updateFields).length === 0 && !req.file) {
 //     return next(new ErrorHandler("No fields provided for update", 400));
 //   }
-
 
 //   const updatedBlog = await blogModel.findByIdAndUpdate(id, updateFields, {
 //     new: true,
